@@ -2,6 +2,8 @@ package rss.controller;
 
 import java.util.List;
 
+import javax.validation.constraints.Size;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import rss.dto.ApiResponse;
 import rss.dto.ElementResponse;
+import rss.dto.IdentifierResponse;
 import rss.dto.RssFeedRequest;
 import rss.service.RssService;
 
@@ -28,21 +31,31 @@ public class RssController {
 	
 	@RequestMapping(path = "/analyse/new", method = RequestMethod.POST, produces = "application/json")
 	public ApiResponse<?> analyzeRss(@RequestBody RssFeedRequest rssUrls){
-
-		String response = rssService.analyzeRssFeeds(rssUrls.getRssUrls());
+                IdentifierResponse requestIdentifier = new IdentifierResponse();
+		requestIdentifier.setRequestIdentifier(rssService.analyzeRssFeeds(rssUrls.getRssUrls()));
 		
-		if(!(response == "error")) {
+		if(!(requestIdentifier.getRequestIdentifier() == null)) {
+			return new ApiResponse<>(requestIdentifier, HttpStatus.OK);
+		} else {
+			return new ApiResponse<>(requestIdentifier, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@RequestMapping(path = "/frequency/{id}", method = RequestMethod.GET, produces = "application/json")
+	public ApiResponse<?> analyzeRss(@PathVariable   String id){
+
+	    if(id.length() == 36) {
+                List<ElementResponse> response = rssService.getAnalysys(id);
+		
+		if(!(response == null)) {
 			return new ApiResponse<>(response, HttpStatus.OK);
 		} else {
 			return new ApiResponse<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-	}
-	
-	@RequestMapping(path = "/frequency/{Id}", method = RequestMethod.GET, produces = "application/json")
-	public ApiResponse<?> analyzeRss(@PathVariable String Id){
-
-		List<ElementResponse> response = rssService.getAnalysys(Id);
-          return new ApiResponse<>(response,  HttpStatus.OK );
+	    } else {
+		return new ApiResponse<>("Request_Id not valid", HttpStatus.BAD_REQUEST);
+	    }
 		
 	}
+	
 }

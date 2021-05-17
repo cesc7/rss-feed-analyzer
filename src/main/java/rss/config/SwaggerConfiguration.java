@@ -29,5 +29,4 @@ public class SwaggerConfiguration {
 		registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
 	}
 	
-
 }

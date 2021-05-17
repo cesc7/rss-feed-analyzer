@@ -38,10 +38,8 @@ public class RssFeed {
 	@Size(max = 128)
 	String link;
 	
-	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "rss_feed_id", referencedColumnName = "id")
 	List<RssFeedItem> items;
-	
-	
+		
 }

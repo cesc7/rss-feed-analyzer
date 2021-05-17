@@ -557,3 +557,9 @@ yourselves
 you've
 zero
 -
+cnn
+news
+sport
+sports
+york
+times

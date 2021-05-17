@@ -19,4 +19,5 @@ public class ApiResponse<T> {
 		this.payload = payload;
 		this.status = status;
 	}
+	
 }

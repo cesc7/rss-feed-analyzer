@@ -1,7 +1,6 @@
 package rss.service;
 
 import java.net.URL;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -20,10 +19,10 @@ import com.sun.syndication.io.XmlReader;
 import rss.model.RssFeedItem;
 import rss.model.RssFeedItemsWords;
 import rss.model.projection.TopFeedItemPicks;
+import rss.repository.RssFeedItemRepository;
+import rss.repository.RssFeedItemsWordsRepository;
+import rss.repository.RssFeedRepository;
 import rss.util.WordExtractor;
-import rss.Repository.RssFeedItemRepository;
-import rss.Repository.RssFeedItemsWordsRepository;
-import rss.Repository.RssFeedRepository;
 import rss.dto.ElementResponse;
 import rss.dto.FeedItemResponse;
 import rss.model.RssFeed;
@@ -31,102 +30,113 @@ import rss.model.RssFeed;
 @Service
 public class RssService {
 	
-	final static Logger logger = LoggerFactory.getLogger(RssService.class);
-	
-	@Value("${app.topicNumber}")
-	int numOfTopics;
-	
-	@Autowired
-	WordExtractor wordExtractor;
-	
-	@Autowired
-	RssFeedRepository rssFeedRepository;
-	
-	@Autowired
-	RssFeedItemRepository rssFeedItemRepository;
-	
-	@Autowired
-	RssFeedItemsWordsRepository rssFeedItemsWordsRepository;
-	
-	public String analyzeRssFeeds(List<String> rssFeedUrls){
-		RssFeed rssFeed = new RssFeed();
-		String requestId = UUID.randomUUID().toString();
-		
+        final static Logger logger = LoggerFactory.getLogger(RssService.class);
+        
+        @Value("${app.topicNumber}")
+        int numOfTopics;
+        
+        @Autowired
+        WordExtractor wordExtractor;
+        
+        @Autowired
+        RssFeedRepository rssFeedRepository;
+        
+        @Autowired
+        RssFeedItemRepository rssFeedItemRepository;
+        
+        @Autowired
+        RssFeedItemsWordsRepository rssFeedItemsWordsRepository;
+        
+        
+        public String analyzeRssFeeds(List<String> rssFeedUrls){
+	 
+           //Generate random requestID 
+           String requestId = UUID.randomUUID().toString();
+           
+           
+           //Iterate through url list and save data from RssFeed to DB
+           RssFeed rssFeed = new RssFeed();
 	  try {
+		for(String url: rssFeedUrls) {
 			
-			for(String url: rssFeedUrls) {
+			SyndFeed syndFeed = new SyndFeedInput().build(new XmlReader(new URL(url)));
+			
+			//RssFeed_TABLE
+			rssFeed.setRequestId(requestId);
+			rssFeed.setTitle(syndFeed.getTitle());
+			rssFeed.setLink(syndFeed.getLink());
+			
+			//Get data for RssFeedItem_TABLE
+			List<SyndEntry> feedItems = syndFeed.getEntries();
+			List<RssFeedItem> rssFeedItems = new ArrayList<>();
+			for (SyndEntry item : feedItems) {
+				RssFeedItem feedItem = new RssFeedItem();
+				feedItem.setTitle(item.getTitle());
+				feedItem.setLink(item.getLink());
 				
-				//Feed
-				SyndFeed syndFeed = new SyndFeedInput().build(new XmlReader(new URL(url)));
-				rssFeed.setRequestId(requestId);
-				rssFeed.setTitle(syndFeed.getTitle());
-				rssFeed.setLink(syndFeed.getLink());
-				
-				//FeedItem
-				List<SyndEntry> feedItems = syndFeed.getEntries();
-				List<RssFeedItem> rssFeedItems = new ArrayList<>();
-				
-				for (SyndEntry item : feedItems) {
-					RssFeedItem feedItem = new RssFeedItem();
-					feedItem.setTitle(item.getTitle());
-					feedItem.setLink(item.getLink());
-					
-					//FeedItemsWords
-					List<RssFeedItemsWords> wordsList = new ArrayList<>();
-					List<String> words = wordExtractor.extractWordsFromRssFeed(item.getTitle());
-					for (String name : words) {
-						RssFeedItemsWords word = new RssFeedItemsWords();
-						word.setName(name);
-						wordsList.add(word);
-					}
-					feedItem.setWords(wordsList);
-					rssFeedItems.add(feedItem);
+				//Get words from titles for RssFeedItemsWords_TABLE
+				List<RssFeedItemsWords> wordsList = new ArrayList<>();
+				List<String> words = wordExtractor.extractWordsFromRssFeed(item.getTitle());
+				for (String name : words) {
+					RssFeedItemsWords word = new RssFeedItemsWords();
+					word.setName(name);
+					wordsList.add(word);
 				}
-				
-				rssFeed.setItems(rssFeedItems);
-				rssFeedRepository.save(rssFeed);
+				feedItem.setWords(wordsList);
+				rssFeedItems.add(feedItem);
 			}
+			rssFeed.setItems(rssFeedItems);
+			
+			rssFeedRepository.save(rssFeed);
+			
+		}
 
-			return requestId;
+		return requestId;
 			
 	  } catch (Exception e) {
 		  logger.error(e.getMessage());
-		  return "error";
+		  return null;
 	  }
-	}
+      }
 	
-	public List<ElementResponse> getAnalysys(String requestId){
+        public List<ElementResponse> getAnalysys(String requestId){
 		
 		List<ElementResponse> response =  new ArrayList<>();
 		
-        //For REQUEST ID GET top words 
-		List<TopFeedItemPicks> topRssFeedItems = rssFeedItemsWordsRepository.getMostFrequentFeedItems(requestId);
+           try {
+	   
+                //Get most common words across all news in order for unique requestId
+    	        List<TopFeedItemPicks> topRssFeedItems = rssFeedItemsWordsRepository.getMostFrequentFeedItems(requestId);
+   		
+   		    for(int i = 0;i < numOfTopics; i++) {
+   			ElementResponse element = new ElementResponse();
+   			
+   			element.setWord(topRssFeedItems.get(i).getName());
+   			
+   			//Get a list of 'RssFeedItem' in which word occurs
+   			List<RssFeedItem> feedItems = rssFeedItemRepository.findAllFeedItemsByWordAndRequestId( requestId, topRssFeedItems.get(i).getName());
+   			
+   		        //Extract title and item and add to response
+   			List<FeedItemResponse> feedItemResponseList = new ArrayList<>();;
+   			for(RssFeedItem feedItem: feedItems) {
+   				
+    				FeedItemResponse feedItemResponse = new FeedItemResponse();
+    				feedItemResponse.setTitle(feedItem.getTitle());
+    				feedItemResponse.setLink(feedItem.getLink());
+    				feedItemResponseList.add(feedItemResponse);
+   			    }
+   			
+   			element.setFeed(feedItemResponseList);	
+   			response.add(element);
+   			}
+   		
+   		return response;
+   		
+       } catch (Exception e) {
+    	   logger.error(e.getMessage());
+    	   return null;
+       }
 		
-		
-		//For - everyOne  of Top Words
-		for(int i = 0;i < numOfTopics; i++) {
-			ElementResponse element = new ElementResponse();
-			
-			element.setWord(topRssFeedItems.get(i).getName());
-			
-			//GET feedItemIds for each word -TEMP COMM
-			List<RssFeedItem> feedItems = rssFeedItemRepository.findAllFeedITemsByWordAndRequestId( requestId, topRssFeedItems.get(i).getName());
-			
-			//For - every feedItem get their title and link
-			List<FeedItemResponse> feedItemResponseList = new ArrayList<>();;
-			for(RssFeedItem feedItem: feedItems) {
-				
-					FeedItemResponse feedItemResponse = new FeedItemResponse();
-					feedItemResponse.setTitle(feedItem.getTitle());
-					feedItemResponse.setLink(feedItem.getLink());
-					feedItemResponseList.add(feedItemResponse);
-				}
-			
-			element.setFeed(feedItemResponseList);	
-			response.add(element);
-			}
-		
-		return response;
-		}
-		
+    }
+	
 }

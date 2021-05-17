@@ -1,4 +1,4 @@
-package rss.Repository;
+package rss.repository;
 
 import java.util.List;
 
@@ -19,8 +19,6 @@ public interface RssFeedItemRepository extends JpaRepository<RssFeedItem, Long> 
 			+ "where rf.request_id = ? \r\n"
 			+ "and iw.name = ? \r\n"
 			+ "", nativeQuery = true)
-	public List<RssFeedItem> findAllFeedITemsByWordAndRequestId(String requestId, String name);
-	
-	
+	public List<RssFeedItem> findAllFeedItemsByWordAndRequestId(String requestId, String name);
 	
 }

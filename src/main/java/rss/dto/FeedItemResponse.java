@@ -11,4 +11,5 @@ public class FeedItemResponse {
 
 	String title;
 	String link;
+	
 }

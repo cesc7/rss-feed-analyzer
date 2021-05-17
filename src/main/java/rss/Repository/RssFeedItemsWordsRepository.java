@@ -1,4 +1,4 @@
-package rss.Repository;
+package rss.repository;
 
 import java.util.List;
 

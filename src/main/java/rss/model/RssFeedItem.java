@@ -32,14 +32,14 @@ public class RssFeedItem {
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 	
-	
-	@Size(max = 2048)
+	@Size(max = 3000)
 	String title;
 	
-	@Size(max = 2048)
+	@Size(max = 3000)
 	String link;
     
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "rss_feed_item_id", referencedColumnName = "id")
 	List<RssFeedItemsWords> words;
+	
 }

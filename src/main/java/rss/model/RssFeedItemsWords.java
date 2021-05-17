@@ -33,4 +33,5 @@ public class RssFeedItemsWords {
 	private RssFeedItem rssFeedItem;
 
 	private String name;
+	
 }
