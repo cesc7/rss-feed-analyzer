@@ -1,0 +1,16 @@
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\Application.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\config\SwaggerConfiguration.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\dto\ApiResponse.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\Repository\RssFeedRepository.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\Repository\RssFeedItemRepository.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\model\RssFeedItemsWords.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\util\WordExtractor.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\dto\FeedItemResponse.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\dto\ElementResponse.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\controller\RssController.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\service\RssService.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\model\RssFeedItem.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\model\projection\TopFeedItemPicks.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\model\RssFeed.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\dto\RssFeedRequest.java
+C:\Java_Projekti\Workspace\rss-feed-analyzer\src\main\java\rss\Repository\RssFeedItemsWordsRepository.java
