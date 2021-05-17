@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+    javax:
+      persistence:
+        schema-generation:
+          scripts:
+            action: drop-and-create
+            create-target: create.sql
+            create-source: metadata 
+ 
+
+
+
+app:
+  name: rss-feed-analyser
+  topicNumber: 3
+
+
+   
+
+logging:
+  level:
+    root: INFO
